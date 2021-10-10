@@ -1,5 +1,4 @@
 const Role = require('./../models/Role');
-const chalk = require('chalk');
 const { addItems, deleteItems } = require('./lib')
 
 const data = [
