@@ -13,11 +13,13 @@
     "request": "^2.88.2"
   },
   "devDependencies": {
+    "chalk": "^4.1.2",
     "nodemon": "^2.0.13"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index",
+    "seed": "node ./seeders/index.js",
     "dev": "nodemon index"
   },
   "repository": {
