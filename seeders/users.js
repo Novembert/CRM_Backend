@@ -1,6 +1,6 @@
 const config = require('config');
 const bcrypt = require('bcryptjs');
-const chalk = require('chalk');
+const { addItems, deleteItems } = require('./lib')
 
 const User = require('./../models/User');
 const Role = require('./../models/Role');
@@ -18,6 +18,14 @@ const mocks = [
     login: 'nBujny',
     role: 'Pracownik',
     password: passwords[0]
+  },
+  {
+    name: "Jan",
+    surname: "Kowalski",
+    dateOfBirth: "1995-08-11",
+    login: 'jKowalski',
+    role: 'Administrator',
+    password: passwords[1]
   }
 ]
 
@@ -25,8 +33,8 @@ const seedUsers = async () => {
   return new Promise(async (resolve, reject) => {
     try {
       await initData()
-      await deleteUsers()
-      await addUsers()
+      await deleteItems(data, User, 'Users', 'login', 0,  ['login'])
+      await addItems(data, User, 'Users', ['login'])
     } catch (err) {
       console.log(err)
       reject(-1)
@@ -57,42 +65,6 @@ const initData = async () => {
     console.log(err)
   }
   
-}
-  
-const deleteUsers =  () => {
-  return new Promise(async (resolve, reject) => {
-    for (let i = 0; i < data.length; i++) {
-      const item = data[i]
-      try {
-        const user = await User.findOne({ name: item.name })
-        if (user) {
-          user.remove()
-          console.log(chalk.yellow(`Users: ${item.name} ${item.surname} removed`))
-        }
-      } catch (err) {
-        reject(err)
-      }
-    }
-    resolve(1)
-  })
-}
-
-const addUsers = async () => {
-  return new Promise(async (resolve, reject) => {
-    for (let i = 0; i < data.length; i++) {
-      const item = data[i]
-      let user = await new User({
-        ...item
-      })
-      try {
-        await user.save()
-        console.log(chalk.green(`Users: ${item.name} ${item.surname} created`))
-      } catch (err) {
-        reject(err)
-      }
-    }
-    resolve(1)
-  })
 }
 
 module.exports = seedUsers
