@@ -7,8 +7,7 @@ const Role = require('./../models/Role');
 
 const passwords = config.get('passwords')
 
-const data = [
-]
+const data = []
 
 const mocks = [
   {
@@ -26,6 +25,14 @@ const mocks = [
     login: 'jKowalski',
     role: 'Administrator',
     password: passwords[1]
+  },
+  {
+    name: "Anna Maria",
+    surname: "Wesołowska",
+    dateOfBirth: "1965-03-25",
+    login: 'amWesolowska',
+    role: 'Pracownik',
+    password: passwords[2]
   }
 ]
 

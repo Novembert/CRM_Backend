@@ -5,7 +5,8 @@ const data = [
   {name: 'Informatyka'},
   {name: 'Budownictwo'},
   {name: 'Motoryzacja'},
-  {name: 'Lotnictwo'}
+  {name: 'Lotnictwo'},
+  {name: 'Gastronomia'}
 ]
 
 const seedIndustries = async () => {
