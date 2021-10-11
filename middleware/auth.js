@@ -13,6 +13,7 @@ module.exports = function(req, res, next) {
     req.user = decoded.user;
     next();
   } catch (error) {
+    console.log(error)
     return res.status(401).json({ msg: 'Błedna autoryzacja' });
   }
 };

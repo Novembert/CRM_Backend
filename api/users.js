@@ -86,11 +86,6 @@ router.get('/:id', auth, async (req, res) => {
     res.json(user);
   } catch (error) {
     console.error(error.message);
-
-    if (error.kind === 'ObjectId') {
-      return res.status(404).json({ msg: 'Nie znaleziono posta' });
-    }
-
     res.status(500).json({ msg: 'Server Error' });
   }
 })
@@ -124,15 +119,13 @@ router.put('/:id', [
     
   } catch (error) {
     console.error(error.message);
-
-    if (error.kind === 'ObjectId') {
-      return res.status(404).json({ msg: 'Nie znaleziono posta' });
-    }
-
     res.status(500).json({ msg: 'Server Error' });
   }
 })
 
+// @route   DELETE api/users/:id
+// @desc    Deletes queried user
+// @access  Protected
 router.delete('/:id', auth, async (req,res) => {
   const id = req.params.id
   try {
@@ -147,11 +140,6 @@ router.delete('/:id', auth, async (req,res) => {
     
   } catch (error) {
     console.error(error.message);
-
-    if (error.kind === 'ObjectId') {
-      return res.status(404).json({ msg: 'Nie znaleziono posta' });
-    }
-
     res.status(500).json({ msg: 'Server Error' });
   }
 })
