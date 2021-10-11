@@ -95,6 +95,67 @@ router.get('/:id', auth, async (req, res) => {
   }
 })
 
+// @route   PUT api/users/:id
+// @desc    Saves changes to queried user
+// @access  Protected
+router.put('/:id', [
+    auth,
+    [
+      check('login', 'Nie można zmienić loginu').not().exists(),
+      check('password', 'Nie można zmienić hasła').not().exists()
+    ],
+  ], async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const id = req.params.id
+
+  try {
+    let user = await User.findByIdAndUpdate(id, req.body, {
+      new: true
+    }).select('-password')
+
+    if (!user) {
+      return res.status(400).json({ msg: 'Nie znaleziono uzytkownika' });
+    }
+    res.json(user)
+    
+  } catch (error) {
+    console.error(error.message);
+
+    if (error.kind === 'ObjectId') {
+      return res.status(404).json({ msg: 'Nie znaleziono posta' });
+    }
+
+    res.status(500).json({ msg: 'Server Error' });
+  }
+})
+
+router.delete('/:id', auth, async (req,res) => {
+  const id = req.params.id
+  try {
+    let user = await User.findByIdAndUpdate(id, { isDeleted: true }, {
+      new: true
+    }).select('-password')
+
+    if (!user) {
+      return res.status(400).json({ msg: 'Nie znaleziono uzytkownika' });
+    }
+    res.json(user)
+    
+  } catch (error) {
+    console.error(error.message);
+
+    if (error.kind === 'ObjectId') {
+      return res.status(404).json({ msg: 'Nie znaleziono posta' });
+    }
+
+    res.status(500).json({ msg: 'Server Error' });
+  }
+})
+
 async function checkForExistingUserByLogin(login) {
   const user = await User.findOne({ login });
   if (user) {
