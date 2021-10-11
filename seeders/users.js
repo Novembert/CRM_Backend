@@ -40,7 +40,7 @@ const seedUsers = async () => {
   return new Promise(async (resolve, reject) => {
     try {
       await initData()
-      await deleteItems(data, User, 'Users', 'login', 0,  ['login'])
+      // await deleteItems(data, User, 'Users', 'login', 0,  ['login'])
       await addItems(data, User, 'Users', ['login'])
     } catch (err) {
       console.log(err)

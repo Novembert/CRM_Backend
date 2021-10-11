@@ -54,7 +54,7 @@ const seedCompanies = async () => {
   return new Promise(async (resolve, reject) => {
     try {
       await initData()
-      await deleteItems(data, Company, 'Companies', 'name', 0,  ['name'])
+      // await deleteItems(data, Company, 'Companies', 'name', 0,  ['name'])
       await addItems(data, Company, 'Companies', ['name'])
     } catch (err) {
       console.log(err)

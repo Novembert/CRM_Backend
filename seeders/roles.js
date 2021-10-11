@@ -9,7 +9,7 @@ const data = [
 const seedRoles = async () => {
   return new Promise(async (resolve, reject) => {
     try {
-      await deleteItems(data, Role, 'Roles', 'name', 0,  ['name'])
+      // await deleteItems(data, Role, 'Roles', 'name', 0,  ['name'])
       await addItems(data, Role, 'Roles', ['name'])
     } catch (err) {
       console.log(err)
