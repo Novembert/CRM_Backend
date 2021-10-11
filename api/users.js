@@ -13,7 +13,7 @@ const User = require('./../models/User');
 router.post(
   '/',
   [
-    check('email', 'Proszę podać prawidłowy email').isEmail(),
+    check('login', 'Proszę podać login').exists(),
     check('password', 'Proszę podać hasło dłuższe niż 7 znaków').isLength({
       min: 8
     }),
@@ -31,18 +31,18 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { email, password, name, surname } = req.body;
+    const { login, password, name, surname } = req.body;
 
     try {
       //check if the user already exists
-      if (await checkForExistingUserByEmail(email)) {
+      if (await checkForExistingUserByLogin(login)) {
         return res.status(400).json({
-          errors: [{ msg: 'Użytkownik z podanym emailem już istnieje' }]
+          errors: [{ msg: 'Użytkownik z podanym loginem już istnieje' }]
         });
       }
 
       let user = new User({
-        email,
+        login,
         password,
         name,
         surname,
@@ -69,16 +69,16 @@ router.post(
   }
 );
 
-async function checkForExistingUserByEmail(email) {
-  const user = await User.findOne({ email });
+async function checkForExistingUserByLogin(login) {
+  const user = await User.findOne({ login });
   if (user) {
     return true;
   } else return false;
 }
 
 async function hashPassword(password) {
-  const salt = await bcrytp.genSalt(10);
-  return await bcrytp.hash(password, salt);
+  const salt = await bcrypt.genSalt(10);
+  return await bcrypt.hash(password, salt);
 }
 
 module.exports = router;

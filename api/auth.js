@@ -14,7 +14,7 @@ router.post(
   '/',
   [
     check('password', 'Hasło jest wymagane').exists(),
-    check('email', 'Poprawny email jest wymagany').isEmail()
+    check('login', 'Login jest wymagany').exists()
   ],
   async (req, res) => {
     //handling errors
@@ -23,10 +23,10 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { email, password } = req.body
+    const { login, password } = req.body
 
     try {
-      const user = await User.findOne({ email })
+      const user = await User.findOne({ login })
 
       if (!user) {
         return res
