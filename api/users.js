@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const config = require('config');
+const auth = require('../middleware/auth');
 const { check, validationResult } = require('express-validator');
 
 const User = require('./../models/User');
@@ -68,6 +69,31 @@ router.post(
     }
   }
 );
+
+// @route   GET api/users/:id
+// @desc    Gets queried user
+// @access  Protected
+router.get('/:id', auth, async (req, res) => {
+  const id = req.params.id
+
+  try {
+    const user = await User.findById(id).select('-password').populate({model: 'Role', path: 'role' })
+
+    if (!user) {
+      return res.status(400).json({ msg: 'Nie znaleziono uzytkownika' });
+    }
+
+    res.json(user);
+  } catch (error) {
+    console.error(error.message);
+
+    if (error.kind === 'ObjectId') {
+      return res.status(404).json({ msg: 'Nie znaleziono posta' });
+    }
+
+    res.status(500).json({ msg: 'Server Error' });
+  }
+})
 
 async function checkForExistingUserByLogin(login) {
   const user = await User.findOne({ login });

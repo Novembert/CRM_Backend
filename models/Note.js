@@ -10,12 +10,12 @@ const NoteSchema = new mongoose.Schema({
   },
   company: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'company'
+    ref: 'Company'
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'user'
+    ref: 'User'
   }
 })
 
-module.exports = Note = mongoose.model('note',NoteSchema);
+module.exports = Note = mongoose.model('Note',NoteSchema);

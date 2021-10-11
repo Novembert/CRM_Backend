@@ -6,4 +6,4 @@ const InudstrySchema = new mongoose.Schema({
   },
 })
 
-module.exports = Inudstry = mongoose.model('inudstry', InudstrySchema);
+module.exports = Inudstry = mongoose.model('Inudstry', InudstrySchema);

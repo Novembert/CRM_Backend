@@ -3,6 +3,13 @@ const connectDB = require('./config/db');
 
 const app = express()
 
+require('./models/User');
+require('./models/Role');
+require('./models/Company');
+require('./models/Industry');
+require('./models/ContactPerson');
+require('./models/Note');
+
 connectDB();
 
 app.use(express.json({ extended: false }));

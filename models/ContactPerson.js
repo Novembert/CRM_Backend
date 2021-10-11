@@ -16,11 +16,11 @@ let ContactPersonSchema = new mongoose.Schema({
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'user'
+    ref: 'User'
   },
   company: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'company'
+    ref: 'Company'
   },
   position: {
     type: String
@@ -40,4 +40,4 @@ ContactPersonSchema.pre('validate', function(next) {
   }
 });
 
-module.exports = ContactPersonSchema = mongoose.model('contactPerson', ContactPersonSchema);
+module.exports = ContactPersonSchema = mongoose.model('CntactPerson', ContactPersonSchema);
