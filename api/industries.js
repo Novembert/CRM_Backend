@@ -56,7 +56,7 @@ router.get('/:id', auth, async (req, res) => {
   }
 })
 
-// @route   POST api/industries/:id
+// @route   PUT api/industries/:id
 // @desc    Saves changes to queried industry
 // @access  Private
 router.put(

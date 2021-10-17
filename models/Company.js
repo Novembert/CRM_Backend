@@ -24,11 +24,13 @@ let CompanySchema = new mongoose.Schema({
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'User',
+    required: true
   },
   industry: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Industry'
+    ref: 'Industry',
+    required: true
   }
 })
 
