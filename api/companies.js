@@ -13,12 +13,12 @@ router.post(
   [
     auth,
     [
-      check('name', 'Nazwa jest wymagana').exists(),
-      check('nip', 'NIP jest wymagany').exists(),
+      check('name', 'Nazwa jest wymagana').not().isEmpty(),
+      check('nip', 'NIP jest wymagany').not().isEmpty(),
       check('nip', 'NIP musi mieć 10 znaków').isLength({ min: 10, max:10 }),
-      check('city', 'Miasto jest wymagane').exists(),
-      check('user', 'Użytkownik musi być przypisany').exists(),
-      check('industry', 'Firma musi być przypisana').exists(),
+      check('city', 'Miasto jest wymagane').not().isEmpty(),
+      check('user', 'Użytkownik musi być przypisany').not().isEmpty(),
+      check('industry', 'Branża musi być przypisana').not().isEmpty(),
     ]
   ],
   async (req, res) => {

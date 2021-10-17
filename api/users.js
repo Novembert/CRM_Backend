@@ -14,7 +14,7 @@ const User = require('./../models/User');
 router.post(
   '/',
   [
-    check('login', 'Proszę podać login').exists(),
+    check('login', 'Proszę podać login').not().isEmpty(),
     check('password', 'Proszę podać hasło dłuższe niż 7 znaków').isLength({
       min: 8
     }),
@@ -96,8 +96,8 @@ router.get('/:id', auth, async (req, res) => {
 router.put('/:id', [
     auth,
     [
-      check('login', 'Nie można zmienić loginu').not().exists(),
-      check('password', 'Nie można zmienić hasła').not().exists()
+      check('login', 'Nie można zmienić loginu').not().not().isEmpty(),
+      check('password', 'Nie można zmienić hasła').not().not().isEmpty(),
     ],
   ], async (req, res) => {
   const errors = validationResult(req);

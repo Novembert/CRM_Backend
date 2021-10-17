@@ -13,8 +13,8 @@ const User = require('./../models/User');
 router.post(
   '/',
   [
-    check('password', 'Hasło jest wymagane').exists(),
-    check('login', 'Login jest wymagany').exists()
+    check('password', 'Hasło jest wymagane').not().isEmpty(),
+    check('login', 'Login jest wymagany').not().isEmpty(),
   ],
   async (req, res) => {
     //handling errors

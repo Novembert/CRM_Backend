@@ -13,7 +13,7 @@ router.post(
   [
     auth,
     [
-      check('name', 'Nazwa jest wymagana').exists()
+      check('name', 'Nazwa jest wymagana').not().isEmpty(),
     ]
   ], 
   async (req, res) => {
@@ -64,7 +64,7 @@ router.put(
   [
     auth,
     [
-      check('name', 'Nazwa jest wymagana').exists()
+      check('name', 'Nazwa jest wymagana').not().isEmpty(),
     ]
   ], 
   async (req, res) => {
