@@ -84,6 +84,10 @@ router.put(
         new: true
       })
 
+      if (!company) {
+        return res.status(400).json({ msg: 'Nie znaleziono firmy' });
+      }
+
       res.json(company)
     } catch (error) {
       console.error(error.message);

@@ -79,6 +79,10 @@ router.put(
         new: true
       })
 
+      if (!industry) {
+        return res.status(400).json({ msg: 'Nie znaleziono branży' });
+      }
+
       res.json(industry)
     } catch (error) {
       console.error(error.message);

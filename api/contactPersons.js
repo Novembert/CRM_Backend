@@ -59,4 +59,58 @@ router.get('/:id', auth, async (req, res) => {
   }
 })
 
+// @route   PUT api/contact-persons/:id
+// @desc    Saves changes to queried contact person
+// @access  Private
+router.put(
+  '/:id',
+  [
+    auth,
+    [
+      check('email', 'E-mail musi być poprawny').optional().isEmail(),
+    ]
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    const id = req.params.id
+
+    try {
+      const contactPerson = await ContactPerson.findByIdAndUpdate(id, req.body, {
+        new: true
+      })
+
+      res.json(contactPerson)
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).json({ msg: 'Server Error' });
+    }
+})
+
+// @route   DELETE api/contact-persons/:id
+// @desc    Deletes queried contact person
+// @access  Private
+router.delete(
+  '/:id',
+  auth,
+  async (req, res) => {
+    const id = req.params.id
+
+    try {
+      const contactPerson = await ContactPerson.findByIdAndUpdate(id, { isDeleted: true }, {
+        new: true
+      })
+
+      if (!contactPerson) {
+        return res.status(400).json({ msg: 'Nie znaleziono osoby kontaktowej' });
+      }
+      res.json(contactPerson)
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).json({ msg: 'Server Error' });
+    }
+})
+
 module.exports = router
