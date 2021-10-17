@@ -4,6 +4,8 @@ const auth = require('../middleware/auth');
 const { check, validationResult } = require('express-validator');
 
 const Company = require('../models/Company');
+const Note = require('../models/Note')
+const ContactPerson = require('../models/ContactPerson')
 
 // @route   POST api/companies
 // @desc    Create company
@@ -55,6 +57,38 @@ router.get('/:id', auth, async (req, res) => {
     }
 
     res.json(company)
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ msg: 'Server Error' });
+  }
+})
+
+// @route   GET api/companies/:id/notes
+// @desc    Gets queried company notes
+// @access  Private
+router.get('/:id/notes', auth, async (req, res) => {
+  const id = req.params.id
+
+  try {
+    const notes = await Note.find({ company: id, isDeleted: false })
+
+    res.json(notes)
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ msg: 'Server Error' });
+  }
+})
+
+// @route   GET api/companies/:id/contact-persons
+// @desc    Gets queried company notes
+// @access  Private
+router.get('/:id/contact-persons', auth, async (req, res) => {
+  const id = req.params.id
+
+  try {
+    const notes = await ContactPerson.find({ company: id, isDeleted: false })
+
+    res.json(notes)
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ msg: 'Server Error' });
