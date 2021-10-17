@@ -132,7 +132,7 @@ router.put(
 
 // @route   DELETE api/companies/:id
 // @desc    Deletes queried company
-// @access  Protected
+// @access  Private
 router.delete('/:id', auth, async (req,res) => {
   const id = req.params.id
   try {

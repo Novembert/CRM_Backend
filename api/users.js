@@ -7,6 +7,9 @@ const auth = require('../middleware/auth');
 const { check, validationResult } = require('express-validator');
 
 const User = require('./../models/User');
+const Company = require('./../models/Company');
+const Note = require('./../models/Note');
+const ContactPerson = require('./../models/ContactPerson');
 
 // @route   POST api/users
 // @desc    Register user
@@ -72,7 +75,7 @@ router.post(
 
 // @route   GET api/users/:id
 // @desc    Gets queried user
-// @access  Protected
+// @access  Private
 router.get('/:id', auth, async (req, res) => {
   const id = req.params.id
 
@@ -90,9 +93,66 @@ router.get('/:id', auth, async (req, res) => {
   }
 })
 
+// @route   GET api/users/:id/companies
+// @desc    Gets queried user's companies
+// @access  Private
+router.get('/:id/companies', auth, async (req, res) => {
+  const id = req.params.id
+
+  try {
+    const companies = await Company.find({
+      user: id,
+      isDeleted: false
+    })
+
+    res.json(companies)
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ msg: 'Server Error' });
+  }
+})
+
+// @route   GET api/users/:id/notes
+// @desc    Gets queried user's notes
+// @access  Private
+router.get('/:id/notes', auth, async (req, res) => {
+  const id = req.params.id
+
+  try {
+    const notes = await Note.find({
+      user: id,
+      isDeleted: false
+    })
+
+    res.json(notes)
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ msg: 'Server Error' });
+  }
+})
+
+// @route   GET api/users/:id/contact-persons
+// @desc    Gets queried user's contact persons
+// @access  Private
+router.get('/:id/contact-persons', auth, async (req, res) => {
+  const id = req.params.id
+
+  try {
+    const contactPersons = await ContactPerson.find({
+      user: id,
+      isDeleted: false
+    })
+
+    res.json(contactPersons)
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ msg: 'Server Error' });
+  }
+})
+
 // @route   PUT api/users/:id
 // @desc    Saves changes to queried user
-// @access  Protected
+// @access  Private
 router.put('/:id', [
     auth,
     [
@@ -125,7 +185,7 @@ router.put('/:id', [
 
 // @route   DELETE api/users/:id
 // @desc    Deletes queried user
-// @access  Protected
+// @access  Private
 router.delete('/:id', auth, async (req,res) => {
   const id = req.params.id
   try {

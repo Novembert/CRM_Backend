@@ -38,7 +38,7 @@ router.post(
 
 // @route   GET api/industries/:id
 // @desc    Gets queried industry
-// @access  Protected
+// @access  Private
 router.get('/:id', auth, async (req, res) => {
   const id = req.params.id
 
@@ -93,7 +93,7 @@ router.put(
 
 // @route   DELETE api/industries/:id
 // @desc    Deletes queried industry
-// @access  Protected
+// @access  Private
 router.delete('/:id', auth, async (req,res) => {
   const id = req.params.id
   try {
