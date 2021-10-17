@@ -51,3 +51,4 @@ Thumbs.db
 # My custom files
 
 /config/default.json
+# /cypress/fixtures
