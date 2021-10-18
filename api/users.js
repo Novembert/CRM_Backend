@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const config = require('config');
 const auth = require('../middleware/auth');
 const checkRole = require('../middleware/checkRole');
+const { likeRelation, clearFilters, calculateSkip, generateOrder }  = require('./lib')
 const { check, validationResult } = require('express-validator');
 
 const User = require('./../models/User');
@@ -74,6 +75,30 @@ router.post(
   }
 );
 
+// @route   GET api/users
+// @desc    Get all users
+// @access  Private
+router.get('/', auth, async (req, res) => {
+  const { name, surname, dateOfBirth, login, role, page, paginate, order = 'surname', orderType = 'asc' } = req.body
+
+  try {
+    let filters = {
+      name: likeRelation(name), 
+      surname: likeRelation(surname), 
+      dateOfBirth, 
+      login: likeRelation(login),
+      role
+    }
+    filters = clearFilters(filters)
+    const users = await User.find({ ...filters, isDeleted: false }).sort(generateOrder(order, orderType)).skip(calculateSkip(page, paginate)).limit(paginate)
+    const count = await User.find({ ...filters, isDeleted: false }).countDocuments()
+    res.json({ data: users, maxPage: Math.ceil(count / paginate) })
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ msg: 'Server Error' });
+  }
+})
+
 // @route   GET api/users/:id
 // @desc    Gets queried user
 // @access  Private
@@ -99,14 +124,30 @@ router.get('/:id', auth, async (req, res) => {
 // @access  Private
 router.get('/:id/companies', auth, async (req, res) => {
   const id = req.params.id
+  const { name, nip, address, city, industry, page, paginate, order = 'name', orderType = 'asc' } = req.body
 
   try {
+    let filters = {
+      name: likeRelation(name), 
+      nip: likeRelation(nip), 
+      address: likeRelation(address), 
+      city: likeRelation(city),
+      industry
+    }
+    filters = clearFilters(filters)
+
     const companies = await Company.find({
+      ...filters, 
       user: id,
       isDeleted: false
-    })
+    }).sort(generateOrder(order, orderType)).skip(calculateSkip(page, paginate)).limit(paginate)
+    const count = await Company.find({
+      ...filters, 
+      user: id,
+      isDeleted: false
+    }).countDocuments()
 
-    res.json(companies)
+    res.json({ data: companies, count })
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ msg: 'Server Error' });
@@ -164,6 +205,10 @@ router.put('/:id', [
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
+  }
+
+  if (req.body.role && req.user.role !== 'Administrator') {
+    return res.status(401).json({ msg: 'Brak uprawnień do edycji roli użytkownika' })
   }
 
   const id = req.params.id
