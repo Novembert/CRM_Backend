@@ -26,7 +26,7 @@ router.post(
     const { login, password } = req.body
 
     try {
-      const user = await User.findOne({ login })
+      const user = await User.findOne({ login }).populate({model: 'Role', path: 'role' })
 
       if (!user) {
         return res
@@ -40,7 +40,7 @@ router.post(
           .status(400)
           .json({ errors: [{ msg: 'Nieprawidłowe dane logowania' }] });
       }
-      const tokenPayLoad = { user: { id: user.id } };
+      const tokenPayLoad = { user: { id: user.id, role: user.role.name } };
       jwt.sign(
         tokenPayLoad,
         config.get('jwtSecret'),

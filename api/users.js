@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const config = require('config');
 const auth = require('../middleware/auth');
+const checkRole = require('../middleware/checkRole');
 const { check, validationResult } = require('express-validator');
 
 const User = require('./../models/User');
@@ -186,7 +187,7 @@ router.put('/:id', [
 // @route   DELETE api/users/:id
 // @desc    Deletes queried user
 // @access  Private
-router.delete('/:id', auth, async (req,res) => {
+router.delete('/:id', [auth, checkRole(['Administrator'])], async (req,res) => {
   const id = req.params.id
   try {
     let user = await User.findByIdAndUpdate(id, { isDeleted: true }, {
