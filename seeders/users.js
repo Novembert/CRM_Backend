@@ -31,7 +31,7 @@ const mocks = [
     surname: "Wesołowska",
     dateOfBirth: "1965-03-25",
     login: 'amWesolowska',
-    role: 'Pracownik',
+    role: 'Moderator',
     password: passwords[2]
   }
 ]

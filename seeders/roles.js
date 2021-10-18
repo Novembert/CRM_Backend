@@ -3,7 +3,8 @@ const { addItems, deleteItems } = require('./lib')
 
 const data = [
   {name: 'Administrator'},
-  {name: 'Pracownik'}
+  {name: 'Pracownik'},
+  {name: 'Moderator'}
 ]
 
 const seedRoles = async () => {
