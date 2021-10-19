@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
+const { likeRelation, clearFilters, calculateSkip, generateOrder }  = require('./lib')
 const { check, validationResult } = require('express-validator');
 
 const Company = require('../models/Company');
@@ -63,32 +64,58 @@ router.get('/:id', auth, async (req, res) => {
   }
 })
 
-// @route   GET api/companies/:id/notes
-// @desc    Gets queried company notes
+// @route   POST api/companies/:id/notes
+// @desc    Gets queried company notes (with filter)
 // @access  Private
-router.get('/:id/notes', auth, async (req, res) => {
+router.post('/:id/notes', auth, async (req, res) => {
   const id = req.params.id
+  const { date, order = 'createdAt', orderType = 'desc', page, paginate } = req.body
 
   try {
-    const notes = await Note.find({ company: id, isDeleted: false })
+    let filters = {
+      date
+    }
+    filters = clearFilters(filters)
 
-    res.json(notes)
+    const notes = await Note.find({ company: id, isDeleted: false, ...filters }).sort(generateOrder(order, orderType)).skip(calculateSkip(page, paginate)).limit(paginate)
+    const count = await Note.find({
+      ...filters, 
+      company: id,
+      isDeleted: false
+    }).countDocuments()
+
+    res.json({ data: notes, count })
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ msg: 'Server Error' });
   }
 })
 
-// @route   GET api/companies/:id/contact-persons
-// @desc    Gets queried company notes
+// @route   POST api/companies/:id/contact-persons
+// @desc    Gets queried company notes (with filter)
 // @access  Private
-router.get('/:id/contact-persons', auth, async (req, res) => {
+router.post('/:id/contact-persons', auth, async (req, res) => {
   const id = req.params.id
+  const { name, surname, phone, mail, order = 'name', orderType = 'asc', page, paginate } = req.body
 
   try {
-    const notes = await ContactPerson.find({ company: id, isDeleted: false })
+    let filters = {
+      name: likeRelation(name),
+      surname: likeRelation(surname),
+      phone: likeRelation(phone),
+      mail: likeRelation(mail),
+    }
+    filters = clearFilters(filters)
 
-    res.json(notes)
+    const notes = await ContactPerson.find({ company: id, isDeleted: false, ...filters }).sort(generateOrder(order, orderType)).skip(calculateSkip(page, paginate)).limit(paginate)
+    
+    const count = await ContactPerson.find({
+      ...filters, 
+      company: id,
+      isDeleted: false
+    }).countDocuments()
+
+    res.json({ data: notes, count })
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ msg: 'Server Error' });

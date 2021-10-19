@@ -75,10 +75,10 @@ router.post(
   }
 );
 
-// @route   GET api/users
-// @desc    Get all users
+// @route   POST api/users/all
+// @desc    Get all users (with filter)
 // @access  Private
-router.get('/', auth, async (req, res) => {
+router.post('/all', auth, async (req, res) => {
   const { name, surname, dateOfBirth, login, role, page, paginate, order = 'surname', orderType = 'asc' } = req.body
 
   try {
@@ -119,10 +119,10 @@ router.get('/:id', auth, async (req, res) => {
   }
 })
 
-// @route   GET api/users/:id/companies
-// @desc    Gets queried user's companies
+// @route   POST api/users/:id/companies
+// @desc    Gets queried user's companies (with filter)
 // @access  Private
-router.get('/:id/companies', auth, async (req, res) => {
+router.post('/:id/companies', auth, async (req, res) => {
   const id = req.params.id
   const { name, nip, address, city, industry, page, paginate, order = 'name', orderType = 'asc' } = req.body
 
@@ -154,38 +154,67 @@ router.get('/:id/companies', auth, async (req, res) => {
   }
 })
 
-// @route   GET api/users/:id/notes
-// @desc    Gets queried user's notes
+// @route   POST api/users/:id/notes
+// @desc    Gets queried user's notes (with filter)
 // @access  Private
-router.get('/:id/notes', auth, async (req, res) => {
+router.post('/:id/notes', auth, async (req, res) => {
   const id = req.params.id
+  const { date, order = 'createdAt', orderType = 'desc', page, paginate } = req.body
 
   try {
+    let filters = {
+      date
+    }
+    filters = clearFilters(filters)
+
     const notes = await Note.find({
+      ...filters,
       user: id,
       isDeleted: false
-    })
+    }).sort(generateOrder(order, orderType)).skip(calculateSkip(page, paginate)).limit(paginate)
 
-    res.json(notes)
+    const count = await Note.find({
+      ...filters, 
+      user: id,
+      isDeleted: false
+    }).countDocuments()
+
+    res.json({data: notes, count })
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ msg: 'Server Error' });
   }
 })
 
-// @route   GET api/users/:id/contact-persons
-// @desc    Gets queried user's contact persons
+// @route   POST api/users/:id/contact-persons
+// @desc    Gets queried user's contact persons (with filter)
 // @access  Private
-router.get('/:id/contact-persons', auth, async (req, res) => {
+router.post('/:id/contact-persons', auth, async (req, res) => {
   const id = req.params.id
+  const { name, surname, phone, mail, order = 'name', orderType = 'asc', page, paginate } = req.body
 
   try {
+    let filters = {
+      name: likeRelation(name),
+      surname: likeRelation(surname),
+      phone: likeRelation(phone),
+      mail: likeRelation(mail),
+    }
+    filters = clearFilters(filters)
+
     const contactPersons = await ContactPerson.find({
       user: id,
-      isDeleted: false
-    })
+      isDeleted: false,
+      ...filters
+    }).sort(generateOrder(order, orderType)).skip(calculateSkip(page, paginate)).limit(paginate)
 
-    res.json(contactPersons)
+    const count = await ContactPerson.find({
+      ...filters, 
+      user: id,
+      isDeleted: false
+    }).countDocuments()
+
+    res.json({ data: contactPersons, count })
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ msg: 'Server Error' });
