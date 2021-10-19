@@ -10,12 +10,18 @@ const NoteSchema = new mongoose.Schema({
   },
   company: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'company'
+    ref: 'Company',
+    required: true
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now()
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'user'
+    ref: 'User',
+    required: true
   }
 })
 
-module.exports = Note = mongoose.model('note',NoteSchema);
+module.exports = Note = mongoose.model('Note',NoteSchema);

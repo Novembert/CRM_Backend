@@ -13,8 +13,8 @@ const User = require('./../models/User');
 router.post(
   '/',
   [
-    check('password', 'Hasło jest wymagane').exists(),
-    check('email', 'Poprawny email jest wymagany').isEmail()
+    check('password', 'Hasło jest wymagane').not().isEmpty(),
+    check('login', 'Login jest wymagany').not().isEmpty(),
   ],
   async (req, res) => {
     //handling errors
@@ -23,10 +23,10 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { email, password } = req.body
+    const { login, password } = req.body
 
     try {
-      const user = await User.findOne({ email })
+      const user = await User.findOne({ login }).populate({model: 'Role', path: 'role' })
 
       if (!user) {
         return res
@@ -40,7 +40,7 @@ router.post(
           .status(400)
           .json({ errors: [{ msg: 'Nieprawidłowe dane logowania' }] });
       }
-      const tokenPayLoad = { user: { id: user.id } };
+      const tokenPayLoad = { user: { id: user.id, role: user.role.name } };
       jwt.sign(
         tokenPayLoad,
         config.get('jwtSecret'),

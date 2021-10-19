@@ -24,11 +24,13 @@ let CompanySchema = new mongoose.Schema({
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'user'
+    ref: 'User',
+    required: true
   },
   industry: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'industry'
+    ref: 'Industry',
+    required: true
   }
 })
 
@@ -37,4 +39,4 @@ CompanySchema.path('nip').validate((value) => {
   return reg.test(value)
 }, 'NIP has to consist of 10 digits.')
 
-module.exports = CompanySchema = mongoose.model('company', CompanySchema);
+module.exports = CompanySchema = mongoose.model('Company', CompanySchema);
