@@ -4,8 +4,22 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const config = require('config');
 const { check, validationResult } = require('express-validator');
+const auth = require('../middleware/auth');
 
 const User = require('./../models/User');
+
+// @route   GET api/auth
+// @desc    Get loggged in user data 
+// @access  Private
+router.get('/', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    res.json(user);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ msg: 'Server Error' });
+  }
+});
 
 // @route   POST api/auth
 // @desc    Login user route
@@ -30,14 +44,14 @@ router.post(
 
       if (!user) {
         return res
-          .status(400)
+          .status(401)
           .json({ errors: [{ msg: 'Nieprawidłowe dane logowania' }] });
       }
 
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
         return res
-          .status(400)
+          .status(401)
           .json({ errors: [{ msg: 'Nieprawidłowe dane logowania' }] });
       }
       const tokenPayLoad = { user: { id: user.id, role: user.role.name } };

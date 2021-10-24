@@ -44,6 +44,39 @@ router.post(
   }
 )
 
+// @route   POST api/companies/all
+// @desc    Gets all companies (with filter)
+// @access  Private
+router.post('/all', auth, async (req, res) => {
+  const { name, nip, address, user, city, industry, page, paginate, order = 'name', orderType = 'asc' } = req.body
+
+  try {
+    let filters = {
+      name: likeRelation(name), 
+      nip: likeRelation(nip), 
+      address: likeRelation(address), 
+      city: likeRelation(city),
+      industry,
+      user
+    }
+    filters = clearFilters(filters)
+
+    const companies = await Company.find({
+      ...filters, 
+      isDeleted: false
+    }).sort(generateOrder(order, orderType)).skip(calculateSkip(page, paginate)).limit(paginate).populate('industry', 'name -_id').populate('user', 'name surname -_id')
+    const count = await Company.find({
+      ...filters, 
+      isDeleted: false
+    }).countDocuments()
+
+    res.json({ data: companies, count })
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ msg: 'Server Error' });
+  }
+})
+
 // @route   GET api/companies/:id
 // @desc    Gets queried company
 // @access  Private
