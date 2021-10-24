@@ -90,9 +90,9 @@ router.post('/all', auth, async (req, res) => {
       role
     }
     filters = clearFilters(filters)
-    const users = await User.find({ ...filters, isDeleted: false }).sort(generateOrder(order, orderType)).skip(calculateSkip(page, paginate)).limit(paginate)
+    const users = await User.find({ ...filters, isDeleted: false }).sort(generateOrder(order, orderType)).skip(calculateSkip(page, paginate)).limit(paginate).populate('role', 'name -_id')
     const count = await User.find({ ...filters, isDeleted: false }).countDocuments()
-    res.json({ data: users, maxPage: Math.ceil(count / paginate) })
+    res.json({ data: users, count})
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ msg: 'Server Error' });
