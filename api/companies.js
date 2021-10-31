@@ -7,6 +7,8 @@ const { check, validationResult } = require('express-validator');
 const Company = require('../models/Company');
 const Note = require('../models/Note')
 const ContactPerson = require('../models/ContactPerson')
+const Industry = require('../models/Industry');
+const User = require('../models/User');
 
 // @route   POST api/companies
 // @desc    Create company
@@ -61,10 +63,36 @@ router.post('/all', auth, async (req, res) => {
     }
     filters = clearFilters(filters)
 
-    const companies = await Company.find({
-      ...filters, 
-      isDeleted: false
-    }).sort(generateOrder(order, orderType)).skip(calculateSkip(page, paginate)).limit(paginate).populate('industry', 'name -_id').populate('user', 'name surname -_id')
+    const companies = await Company.aggregate([
+      { "$match": { ...filters, isDeleted: false }},
+      { "$lookup": {
+        "from": Industry.collection.name,
+        "localField": "industry",
+        "foreignField": "_id",
+        "as": "industry"
+      }},
+      { "$lookup": {
+        "from": User.collection.name,
+        "localField": "user",
+        "foreignField": "_id",
+        "as": "user"
+      }},
+      { "$unwind": "$industry" },
+      { "$unwind": "$user" },
+      { "$sort": generateOrder(order, orderType)},
+      { "$skip": calculateSkip(page, paginate)},
+      { "$limit": paginate},
+      { "$project": { 
+        "user.name": 1,
+        "user.surname": 1,
+        'name': 1,
+        'nip': 1,
+        'address': 1,
+        'city': 1,
+        'industry.name': 1,
+        'user.name+user.surname': 1,
+      }}
+    ])
     const count = await Company.find({
       ...filters, 
       isDeleted: false
