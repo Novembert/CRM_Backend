@@ -59,12 +59,11 @@ router.post('/all', auth, async (req, res) => {
       nip: likeRelation(nip), 
       address: likeRelation(address), 
       city: likeRelation(city),
-      industry,
-      user
     }
     filters = clearFilters(filters)
 
     let aggregation = [
+      { "$match": { ...filters, isDeleted: false }},
       { "$lookup": {
         "from": Industry.collection.name,
         "localField": "industry",
@@ -83,6 +82,7 @@ router.post('/all', auth, async (req, res) => {
       { "$skip": calculateSkip(page, paginate)},
       { "$limit": paginate},
       { "$project": { 
+        "_id": 1,
         "user.name": 1,
         "user.surname": 1,
         'name': 1,
@@ -90,14 +90,15 @@ router.post('/all', auth, async (req, res) => {
         'address': 1,
         'city': 1,
         'industry.name': 1,
+        'industry._id': 1,
       }}
     ]
 
-    if (filters.industry) {
-      aggregation.splice(-4, 0, { "$match": { "industry._id": new mongoose.Types.ObjectId(filters.industry)}})
+    if (industry) {
+      aggregation.splice(-4, 0, { "$match": { "industry._id": new mongoose.Types.ObjectId(industry)}})
     }
-    if (filters.user) {
-      aggregation.splice(-4, 0, { "$match": { "user._id": new mongoose.Types.ObjectId(filters.user)}})
+    if (user) {
+      aggregation.splice(-4, 0, { "$match": { "user._id": new mongoose.Types.ObjectId(user)}})
     }
 
     const companies = await Company.aggregate(aggregation)
