@@ -11,6 +11,7 @@ const { check, validationResult } = require('express-validator');
 const User = require('./../models/User');
 const Company = require('./../models/Company');
 const Note = require('./../models/Note');
+const Role = require('./../models/Role');
 const ContactPerson = require('./../models/ContactPerson');
 
 // @route   POST api/users
@@ -90,7 +91,26 @@ router.post('/all', auth, async (req, res) => {
       role
     }
     filters = clearFilters(filters)
-    const users = await User.find({ ...filters, isDeleted: false }).sort(generateOrder(order, orderType)).skip(calculateSkip(page, paginate)).limit(paginate).populate('role', 'name -_id')
+    // const users = await User.find({ ...filters, isDeleted: false }).sort(generateOrder(order, orderType)).skip(calculateSkip(page, paginate)).limit(paginate).populate('role', 'name -_id')
+    const users = await User.aggregate([
+      { "$match": { ...filters, isDeleted: false }},
+      { "$lookup": {
+        "from": Role.collection.name,
+        "localField": "role",
+        "foreignField": "_id",
+        "as": "role"
+      }},
+      { "$unwind": "$role" },
+      { "$sort": generateOrder(order, orderType)},
+      { "$skip": calculateSkip(page, paginate)},
+      { "$limit": paginate},
+      { "$project": { 
+        "name": 1,
+        "surname": 1,
+        'dateOfBirth': 1,
+        'role.name': 1,
+      }}
+    ])
     const count = await User.find({ ...filters, isDeleted: false }).countDocuments()
     res.json({ data: users, count})
   } catch (error) {

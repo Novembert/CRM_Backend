@@ -90,7 +90,6 @@ router.post('/all', auth, async (req, res) => {
         'address': 1,
         'city': 1,
         'industry.name': 1,
-        'user.name+user.surname': 1,
       }}
     ])
     const count = await Company.find({
