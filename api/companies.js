@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
+const mongoose = require('mongoose')
 const { likeRelation, clearFilters, calculateSkip, generateOrder }  = require('./lib')
 const { check, validationResult } = require('express-validator');
 
@@ -63,13 +64,12 @@ router.post('/all', auth, async (req, res) => {
     }
     filters = clearFilters(filters)
 
-    const companies = await Company.aggregate([
-      { "$match": { ...filters, isDeleted: false }},
+    let aggregation = [
       { "$lookup": {
         "from": Industry.collection.name,
         "localField": "industry",
         "foreignField": "_id",
-        "as": "industry"
+        "as": "industry",
       }},
       { "$lookup": {
         "from": User.collection.name,
@@ -91,7 +91,16 @@ router.post('/all', auth, async (req, res) => {
         'city': 1,
         'industry.name': 1,
       }}
-    ])
+    ]
+
+    if (filters.industry) {
+      aggregation.splice(-4, 0, { "$match": { "industry._id": new mongoose.Types.ObjectId(filters.industry)}})
+    }
+    if (filters.user) {
+      aggregation.splice(-4, 0, { "$match": { "user._id": new mongoose.Types.ObjectId(filters.user)}})
+    }
+
+    const companies = await Company.aggregate(aggregation)
     const count = await Company.find({
       ...filters, 
       isDeleted: false

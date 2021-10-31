@@ -119,6 +119,19 @@ router.post('/all', auth, async (req, res) => {
   }
 })
 
+// @route   GET api/users/all
+// @desc    Get all users (without filter)
+// @access  Private
+router.get('/all', auth, async (req, res) => {
+  try {
+    const users = await User.find({ isDeleted: false })
+    res.json(users)
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ msg: 'Server Error' });
+  }
+})
+
 // @route   GET api/users/:id
 // @desc    Gets queried user
 // @access  Private

@@ -36,6 +36,19 @@ router.post(
   }
 )
 
+// @route   GET api/industries/all
+// @desc    Get all industries (without filter)
+// @access  Private
+router.get('/all', auth, async (req, res) => {
+  try {
+    const industries = await Industry.find({ isDeleted: false })
+    res.json(industries)
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ msg: 'Server Error' });
+  }
+})
+
 // @route   GET api/industries/:id
 // @desc    Gets queried industry
 // @access  Private
