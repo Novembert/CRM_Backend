@@ -4,10 +4,10 @@ const auth = require('../middleware/auth');
 
 const Role = require('../models/Role');
 
-// @route   GET api/roles
+// @route   GET api/roles/all
 // @desc    Get all roles
 // @access  Private
-router.get('/', auth, async (req, res) => {
+router.get('/all', auth, async (req, res) => {
   try {
     const roles = await Role.find()
 

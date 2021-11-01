@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const config = require('config');
 const auth = require('../middleware/auth');
+const mongoose = require('mongoose')
 const checkRole = require('../middleware/checkRole');
 const { likeRelation, clearFilters, calculateSkip, generateOrder }  = require('./lib')
 const { check, validationResult } = require('express-validator');
@@ -29,6 +30,9 @@ router.post(
       .isEmpty(),
     check('surname', `Pole 'nazwisko' jest wymagane`)
       .not()
+      .isEmpty(),
+    check('surname', `Pole 'rola' jest wymagane`)
+      .not()
       .isEmpty()
   ],
   async (req, res) => {
@@ -38,7 +42,7 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { login, password, name, surname } = req.body;
+    const { login, password, name, surname, role } = req.body;
 
     try {
       //check if the user already exists
@@ -53,22 +57,24 @@ router.post(
         password,
         name,
         surname,
+        role
       });
 
       user.password = await hashPassword(password);
 
       await user.save();
 
-      const tokenPayLoad = { user: { id: user.id } };
-      jwt.sign(
-        tokenPayLoad,
-        config.get('jwtSecret'),
-        { expiresIn: 7200 },
-        (error, token) => {
-          if (error) throw error;
-          res.json({ token });
-        }
-      );
+      // const tokenPayLoad = { user: { id: user.id } };
+      // jwt.sign(
+      //   tokenPayLoad,
+      //   config.get('jwtSecret'),
+      //   { expiresIn: 7200 },
+      //   (error, token) => {
+      //     if (error) throw error;
+      //     res.json({ token });
+      //   }
+      // );
+      res.json(user)
     } catch (error) {
       console.error(error.message);
       res.status(500).json({ msg: 'Server Error' });
@@ -88,11 +94,10 @@ router.post('/all', auth, async (req, res) => {
       surname: likeRelation(surname), 
       dateOfBirth, 
       login: likeRelation(login),
-      role
     }
     filters = clearFilters(filters)
-    // const users = await User.find({ ...filters, isDeleted: false }).sort(generateOrder(order, orderType)).skip(calculateSkip(page, paginate)).limit(paginate).populate('role', 'name -_id')
-    const users = await User.aggregate([
+
+    let aggregation = [
       { "$match": { ...filters, isDeleted: false }},
       { "$lookup": {
         "from": Role.collection.name,
@@ -107,10 +112,19 @@ router.post('/all', auth, async (req, res) => {
       { "$project": { 
         "name": 1,
         "surname": 1,
+        "login": 1,
         'dateOfBirth': 1,
         'role.name': 1,
+        'role._id': 1,
+        '_id': 1
       }}
-    ])
+    ]
+
+    if (role) {
+      aggregation.splice(-4, 0, { "$match": { "role._id": new mongoose.Types.ObjectId(role)}})
+    }
+
+    const users = await User.aggregate(aggregation)
     const count = await User.find({ ...filters, isDeleted: false }).countDocuments()
     res.json({ data: users, count})
   } catch (error) {
@@ -259,16 +273,7 @@ router.post('/:id/contact-persons', auth, async (req, res) => {
 // @access  Private
 router.put('/:id', [
     auth,
-    [
-      check('login', 'Nie można zmienić loginu').not().not().isEmpty(),
-      check('password', 'Nie można zmienić hasła').not().not().isEmpty(),
-    ],
   ], async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-
   if (req.body.role && req.user.role !== 'Administrator') {
     return res.status(401).json({ msg: 'Brak uprawnień do edycji roli użytkownika' })
   }
