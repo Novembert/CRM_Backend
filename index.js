@@ -20,7 +20,7 @@ app.use('/api/auth', require('./api/auth'));
 app.use('/api/users', require('./api/users'));
 app.use('/api/industries', require('./api/industries'));
 app.use('/api/companies', require('./api/companies'));
-app.use('/api/contact-persons', require('./api/contactPersons'));
+app.use('/api/contact-people', require('./api/contactPeople'));
 app.use('/api/roles', require('./api/roles'));
 app.use('/api/notes', require('./api/notes'));
 

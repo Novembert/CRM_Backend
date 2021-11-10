@@ -121,7 +121,7 @@ router.get('/:id', auth, async (req, res) => {
   const id = req.params.id
 
   try {
-    const company = await Company.findById(id)
+    const company = await Company.findById(id).populate({model: 'Industry', path: 'industry' }).populate({model: 'User', path: 'user'}) 
 
     if (!company) {
       return res.status(400).json({ msg: 'Nie znaleziono firmy' });
@@ -161,10 +161,10 @@ router.post('/:id/notes', auth, async (req, res) => {
   }
 })
 
-// @route   POST api/companies/:id/contact-persons
+// @route   POST api/companies/:id/contact-people
 // @desc    Gets queried company notes (with filter)
 // @access  Private
-router.post('/:id/contact-persons', auth, async (req, res) => {
+router.post('/:id/contact-people', auth, async (req, res) => {
   const id = req.params.id
   const { name, surname, phone, mail, order = 'name', orderType = 'asc', page, paginate } = req.body
 

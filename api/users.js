@@ -183,11 +183,41 @@ router.post('/:id/companies', auth, async (req, res) => {
     }
     filters = clearFilters(filters)
 
-    const companies = await Company.find({
-      ...filters, 
-      user: id,
-      isDeleted: false
-    }).sort(generateOrder(order, orderType)).skip(calculateSkip(page, paginate)).limit(paginate)
+    let aggregation = [
+      { "$match": { ...filters, isDeleted: false }},
+      { "$lookup": {
+        "from": Industry.collection.name,
+        "localField": "industry",
+        "foreignField": "_id",
+        "as": "industry",
+      }},
+      { "$lookup": {
+        "from": User.collection.name,
+        "localField": "user",
+        "foreignField": "_id",
+        "as": "user"
+      }},
+      { "$unwind": "$industry" },
+      { "$unwind": "$user" },
+      { "$match": { "user._id": new mongoose.Types.ObjectId(id)}},
+      { "$sort": generateOrder(order, orderType)},
+      { "$skip": calculateSkip(page, paginate)},
+      { "$limit": paginate},
+      { "$project": { 
+        "_id": 1,
+        "user.name": 1,
+        "user.surname": 1,
+        'name': 1,
+        'nip': 1,
+        'address': 1,
+        'city': 1,
+        'industry.name': 1,
+        'industry._id': 1,
+      }}
+    ]
+
+    const companies = await Company.aggregate(aggregation)
+
     const count = await Company.find({
       ...filters, 
       user: id,
@@ -249,7 +279,7 @@ router.post('/:id/contact-persons', auth, async (req, res) => {
     }
     filters = clearFilters(filters)
 
-    const contactPersons = await ContactPerson.find({
+    const contactPeople = await ContactPerson.find({
       user: id,
       isDeleted: false,
       ...filters
@@ -261,7 +291,7 @@ router.post('/:id/contact-persons', auth, async (req, res) => {
       isDeleted: false
     }).countDocuments()
 
-    res.json({ data: contactPersons, count })
+    res.json({ data: contactPeople, count })
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ msg: 'Server Error' });
