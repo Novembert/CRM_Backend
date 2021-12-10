@@ -263,10 +263,10 @@ router.post('/:id/notes', auth, async (req, res) => {
   }
 })
 
-// @route   POST api/users/:id/contact-persons
+// @route   POST api/users/:id/contact-people
 // @desc    Gets queried user's contact persons (with filter)
 // @access  Private
-router.post('/:id/contact-persons', auth, async (req, res) => {
+router.post('/:id/contact-people', auth, async (req, res) => {
   const id = req.params.id
   const { name, surname, phone, mail, order = 'name', orderType = 'asc', page, paginate } = req.body
 
