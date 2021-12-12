@@ -248,7 +248,7 @@ router.post('/:id/notes', auth, async (req, res) => {
       ...filters,
       user: id,
       isDeleted: false
-    }).sort(generateOrder(order, orderType)).skip(calculateSkip(page, paginate)).limit(paginate)
+    }).sort(generateOrder(order, orderType)).skip(calculateSkip(page, paginate)).limit(paginate).populate({model: 'User', path: 'user', select: {'name': 1, 'surname': 1}}) 
 
     const count = await Note.find({
       ...filters, 

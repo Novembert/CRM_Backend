@@ -139,7 +139,7 @@ router.get('/:id', auth, async (req, res) => {
 // @access  Private
 router.post('/:id/notes', auth, async (req, res) => {
   const id = req.params.id
-  const { date, order = 'createdAt', orderType = 'desc', page, paginate } = req.body
+  const { date, user, order = 'createdAt', orderType = 'desc', page, paginate } = req.body
 
   try {
     let filters = {
@@ -147,7 +147,40 @@ router.post('/:id/notes', auth, async (req, res) => {
     }
     filters = clearFilters(filters)
 
-    const notes = await Note.find({ company: id, isDeleted: false, ...filters }).sort(generateOrder(order, orderType)).skip(calculateSkip(page, paginate)).limit(paginate)
+    let aggregation = [
+      { "$match": { ...filters, isDeleted: false }},
+      { "$lookup": {
+        "from": User.collection.name,
+        "localField": "user",
+        "foreignField": "_id",
+        "as": "user"
+      }},
+      { "$lookup": {
+        "from": Company.collection.name,
+        "localField": "company",
+        "foreignField": "_id",
+        "as": "company"
+      }},
+      { "$unwind": "$user" },
+      { "$unwind": "$company" },
+      { "$match": { "company._id": new mongoose.Types.ObjectId(id)}},
+      { "$sort": generateOrder(order, orderType)},
+      { "$skip": calculateSkip(page, paginate)},
+      { "$limit": paginate},
+      { "$project": { 
+        "_id": 1,
+        "user.name": 1,
+        "user.surname": 1,
+        'createdAt': 1,
+        'content': 1
+      }}
+    ]
+
+    if (user) {
+      aggregation.splice(-4, 0, { "$match": { "user._id": new mongoose.Types.ObjectId(user)}})
+    }
+
+    const notes = await Note.aggregate(aggregation)
     const count = await Note.find({
       ...filters, 
       company: id,
