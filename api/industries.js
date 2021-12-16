@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
 const { check, validationResult } = require('express-validator');
+const { likeRelation, clearFilters, calculateSkip, generateOrder }  = require('./lib')
 
 const Industry = require('./../models/Industry');
 
@@ -43,6 +44,32 @@ router.get('/all', auth, async (req, res) => {
   try {
     const industries = await Industry.find({ isDeleted: false })
     res.json(industries)
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ msg: 'Server Error' });
+  }
+})
+
+// @route   POST api/industries/all
+// @desc    Get all industries (with filter)
+// @access  Private
+router.post('/all', auth, async (req, res) => {
+  const { name, order = 'name', orderType = 'asc', page, paginate } = req.body
+  
+  try {
+    let filters = {
+      name: likeRelation(name),
+    }
+    filters = clearFilters(filters)
+
+    const industries = await Industry.find({ isDeleted: false, ...filters }).sort(generateOrder(order, orderType)).skip(calculateSkip(page, paginate)).limit(paginate)
+    
+    const count = await Industry.find({
+      ...filters, 
+      isDeleted: false
+    }).countDocuments()
+    
+    res.json({ data: industries, count })
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ msg: 'Server Error' });
