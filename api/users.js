@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const config = require('config');
 const auth = require('../middleware/auth');
+const mongoose = require('mongoose')
 const checkRole = require('../middleware/checkRole');
 const { likeRelation, clearFilters, calculateSkip, generateOrder }  = require('./lib')
 const { check, validationResult } = require('express-validator');
@@ -11,6 +12,7 @@ const { check, validationResult } = require('express-validator');
 const User = require('./../models/User');
 const Company = require('./../models/Company');
 const Note = require('./../models/Note');
+const Role = require('./../models/Role');
 const ContactPerson = require('./../models/ContactPerson');
 
 // @route   POST api/users
@@ -28,6 +30,9 @@ router.post(
       .isEmpty(),
     check('surname', `Pole 'nazwisko' jest wymagane`)
       .not()
+      .isEmpty(),
+    check('surname', `Pole 'rola' jest wymagane`)
+      .not()
       .isEmpty()
   ],
   async (req, res) => {
@@ -37,7 +42,7 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { login, password, name, surname } = req.body;
+    const { login, password, name, surname, role } = req.body;
 
     try {
       //check if the user already exists
@@ -52,25 +57,27 @@ router.post(
         password,
         name,
         surname,
+        role
       });
 
       user.password = await hashPassword(password);
 
       await user.save();
 
-      const tokenPayLoad = { user: { id: user.id } };
-      jwt.sign(
-        tokenPayLoad,
-        config.get('jwtSecret'),
-        { expiresIn: 7200 },
-        (error, token) => {
-          if (error) throw error;
-          res.json({ token });
-        }
-      );
+      // const tokenPayLoad = { user: { id: user.id } };
+      // jwt.sign(
+      //   tokenPayLoad,
+      //   config.get('jwtSecret'),
+      //   { expiresIn: 7200 },
+      //   (error, token) => {
+      //     if (error) throw error;
+      //     res.json({ token });
+      //   }
+      // );
+      res.json(user)
     } catch (error) {
       console.error(error.message);
-      res.status(500).json({ msg: 'Server Error' });
+      res.status(500).json({ msg: 'Błąd serwera' });
     }
   }
 );
@@ -87,15 +94,55 @@ router.post('/all', auth, async (req, res) => {
       surname: likeRelation(surname), 
       dateOfBirth, 
       login: likeRelation(login),
-      role
     }
     filters = clearFilters(filters)
-    const users = await User.find({ ...filters, isDeleted: false }).sort(generateOrder(order, orderType)).skip(calculateSkip(page, paginate)).limit(paginate)
+
+    let aggregation = [
+      { "$match": { ...filters, isDeleted: false }},
+      { "$lookup": {
+        "from": Role.collection.name,
+        "localField": "role",
+        "foreignField": "_id",
+        "as": "role"
+      }},
+      { "$unwind": "$role" },
+      { "$sort": generateOrder(order, orderType)},
+      { "$skip": calculateSkip(page, paginate)},
+      { "$limit": paginate},
+      { "$project": { 
+        "name": 1,
+        "surname": 1,
+        "login": 1,
+        'dateOfBirth': 1,
+        'role.name': 1,
+        'role._id': 1,
+        '_id': 1
+      }}
+    ]
+
+    if (role) {
+      aggregation.splice(-4, 0, { "$match": { "role._id": new mongoose.Types.ObjectId(role)}})
+    }
+
+    const users = await User.aggregate(aggregation)
     const count = await User.find({ ...filters, isDeleted: false }).countDocuments()
-    res.json({ data: users, maxPage: Math.ceil(count / paginate) })
+    res.json({ data: users, count})
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({ msg: 'Server Error' });
+    res.status(500).json({ msg: 'Błąd serwera' });
+  }
+})
+
+// @route   GET api/users/all
+// @desc    Get all users (without filter)
+// @access  Private
+router.get('/all', auth, async (req, res) => {
+  try {
+    const users = await User.find({ isDeleted: false })
+    res.json(users)
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ msg: 'Błąd serwera' });
   }
 })
 
@@ -115,7 +162,7 @@ router.get('/:id', auth, async (req, res) => {
     res.json(user);
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({ msg: 'Server Error' });
+    res.status(500).json({ msg: 'Błąd serwera' });
   }
 })
 
@@ -136,11 +183,41 @@ router.post('/:id/companies', auth, async (req, res) => {
     }
     filters = clearFilters(filters)
 
-    const companies = await Company.find({
-      ...filters, 
-      user: id,
-      isDeleted: false
-    }).sort(generateOrder(order, orderType)).skip(calculateSkip(page, paginate)).limit(paginate)
+    let aggregation = [
+      { "$match": { ...filters, isDeleted: false }},
+      { "$lookup": {
+        "from": Industry.collection.name,
+        "localField": "industry",
+        "foreignField": "_id",
+        "as": "industry",
+      }},
+      { "$lookup": {
+        "from": User.collection.name,
+        "localField": "user",
+        "foreignField": "_id",
+        "as": "user"
+      }},
+      { "$unwind": "$industry" },
+      { "$unwind": "$user" },
+      { "$match": { "user._id": new mongoose.Types.ObjectId(id)}},
+      { "$sort": generateOrder(order, orderType)},
+      { "$skip": calculateSkip(page, paginate)},
+      { "$limit": paginate},
+      { "$project": { 
+        "_id": 1,
+        "user.name": 1,
+        "user.surname": 1,
+        'name': 1,
+        'nip': 1,
+        'address': 1,
+        'city': 1,
+        'industry.name': 1,
+        'industry._id': 1,
+      }}
+    ]
+
+    const companies = await Company.aggregate(aggregation)
+
     const count = await Company.find({
       ...filters, 
       user: id,
@@ -150,7 +227,7 @@ router.post('/:id/companies', auth, async (req, res) => {
     res.json({ data: companies, count })
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({ msg: 'Server Error' });
+    res.status(500).json({ msg: 'Błąd serwera' });
   }
 })
 
@@ -171,7 +248,7 @@ router.post('/:id/notes', auth, async (req, res) => {
       ...filters,
       user: id,
       isDeleted: false
-    }).sort(generateOrder(order, orderType)).skip(calculateSkip(page, paginate)).limit(paginate)
+    }).sort(generateOrder(order, orderType)).skip(calculateSkip(page, paginate)).limit(paginate).populate({model: 'User', path: 'user', select: {'name': 1, 'surname': 1}}) 
 
     const count = await Note.find({
       ...filters, 
@@ -182,14 +259,14 @@ router.post('/:id/notes', auth, async (req, res) => {
     res.json({data: notes, count })
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({ msg: 'Server Error' });
+    res.status(500).json({ msg: 'Błąd serwera' });
   }
 })
 
-// @route   POST api/users/:id/contact-persons
+// @route   POST api/users/:id/contact-people
 // @desc    Gets queried user's contact persons (with filter)
 // @access  Private
-router.post('/:id/contact-persons', auth, async (req, res) => {
+router.post('/:id/contact-people', auth, async (req, res) => {
   const id = req.params.id
   const { name, surname, phone, mail, order = 'name', orderType = 'asc', page, paginate } = req.body
 
@@ -202,7 +279,7 @@ router.post('/:id/contact-persons', auth, async (req, res) => {
     }
     filters = clearFilters(filters)
 
-    const contactPersons = await ContactPerson.find({
+    const contactPeople = await ContactPerson.find({
       user: id,
       isDeleted: false,
       ...filters
@@ -214,10 +291,10 @@ router.post('/:id/contact-persons', auth, async (req, res) => {
       isDeleted: false
     }).countDocuments()
 
-    res.json({ data: contactPersons, count })
+    res.json({ data: contactPeople, count })
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({ msg: 'Server Error' });
+    res.status(500).json({ msg: 'Błąd serwera' });
   }
 })
 
@@ -226,16 +303,7 @@ router.post('/:id/contact-persons', auth, async (req, res) => {
 // @access  Private
 router.put('/:id', [
     auth,
-    [
-      check('login', 'Nie można zmienić loginu').not().not().isEmpty(),
-      check('password', 'Nie można zmienić hasła').not().not().isEmpty(),
-    ],
   ], async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-
   if (req.body.role && req.user.role !== 'Administrator') {
     return res.status(401).json({ msg: 'Brak uprawnień do edycji roli użytkownika' })
   }
@@ -254,7 +322,7 @@ router.put('/:id', [
     
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({ msg: 'Server Error' });
+    res.status(500).json({ msg: 'Błąd serwera' });
   }
 })
 
@@ -275,7 +343,7 @@ router.delete('/:id', [auth, checkRole(['Administrator'])], async (req,res) => {
     
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({ msg: 'Server Error' });
+    res.status(500).json({ msg: 'Błąd serwera' });
   }
 })
 

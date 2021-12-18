@@ -3,7 +3,7 @@ const seedRoles = require('./roles')
 const seedUsers = require('./users')
 const seedIndustries = require('./industries')
 const seedCompanies = require('./companies')
-const seedContactPersons = require('./contactPersons')
+const seedContactPeople = require('./contactPeople')
 const seedNotes = require('./notes')
 const chalk = require('chalk');
 
@@ -32,7 +32,7 @@ const seed = async () => {
   await seedUsers()
   await seedIndustries()
   await seedCompanies()
-  await seedContactPersons()
+  await seedContactPeople()
   await seedNotes()
   console.log('FINISHED')
   process.exit()

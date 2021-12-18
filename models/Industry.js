@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const InudstrySchema = new mongoose.Schema({
+const IndustrySchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
@@ -11,4 +11,4 @@ const InudstrySchema = new mongoose.Schema({
   }
 })
 
-module.exports = Inudstry = mongoose.model('Inudstry', InudstrySchema);
+module.exports = Industry = mongoose.model('Industry', IndustrySchema);

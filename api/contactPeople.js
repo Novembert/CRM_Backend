@@ -5,7 +5,7 @@ const { check, validationResult } = require('express-validator');
 
 const ContactPerson = require('../models/ContactPerson');
 
-// @route   POST api/contact-persons
+// @route   POST api/contact-people
 // @desc    Create contact person
 // @access  Private
 router.post(
@@ -16,7 +16,6 @@ router.post(
       check('name', 'Imię jest wymagane').not().isEmpty(),
       check('surname', 'Naziwsko jest wymagane').not().isEmpty(),
       check('email', 'E-mail musi być poprawny').optional().isEmail(),
-      check('city', 'Miasto jest wymagane').not().isEmpty(),
       check('user', 'Użytkownik musi być przypisany').not().isEmpty(),
       check('company', 'Firma musi być przypisana').not().isEmpty(),
     ]
@@ -34,12 +33,12 @@ router.post(
       res.json(contactPerson)
     } catch (error) {
       console.error(error.message);
-      res.status(500).json({ msg: 'Server Error' });
+      res.status(500).json({ msg: 'Błąd serwera' });
     }
   }
 )
 
-// @route   GET api/contact-persons/:id
+// @route   GET api/contact-person/:id
 // @desc    Gets queried contact person
 // @access  Private
 router.get('/:id', auth, async (req, res) => {
@@ -55,11 +54,11 @@ router.get('/:id', auth, async (req, res) => {
     res.json(contactPerson)
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({ msg: 'Server Error' });
+    res.status(500).json({ msg: 'Błąd serwera' });
   }
 })
 
-// @route   PUT api/contact-persons/:id
+// @route   PUT api/contact-person/:id
 // @desc    Saves changes to queried contact person
 // @access  Private
 router.put(
@@ -85,11 +84,11 @@ router.put(
       res.json(contactPerson)
     } catch (error) {
       console.error(error.message);
-      res.status(500).json({ msg: 'Server Error' });
+      res.status(500).json({ msg: 'Błąd serwera' });
     }
 })
 
-// @route   DELETE api/contact-persons/:id
+// @route   DELETE api/contact-person/:id
 // @desc    Deletes queried contact person
 // @access  Private
 router.delete(
@@ -109,7 +108,7 @@ router.delete(
       res.json(contactPerson)
     } catch (error) {
       console.error(error.message);
-      res.status(500).json({ msg: 'Server Error' });
+      res.status(500).json({ msg: 'Błąd serwera' });
     }
 })
 

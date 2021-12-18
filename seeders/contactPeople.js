@@ -1,8 +1,8 @@
 const { addItems } = require('./lib')
 
-const User = require('./../models/User');
-const Company = require('./../models/Company');
-const ContactPerson = require('./../models/ContactPerson')
+const User = require('../models/User');
+const Company = require('../models/Company');
+const ContactPerson = require('../models/ContactPerson')
 
 const data = []
 
@@ -51,12 +51,12 @@ const initData = async () => {
   }
 }
 
-const seedContactPersons = async () => {
+const seedContactPeople = async () => {
   return new Promise(async (resolve, reject) => {
     try {
       await initData()
       // await deleteItems(data, Company, 'Companies', 'name', 0,  ['name'])
-      await addItems(data, ContactPerson, 'ContactPersons', ['name', 'surname'])
+      await addItems(data, ContactPerson, 'ContactPeople', ['name', 'surname'])
     } catch (err) {
       console.log(err)
       reject(-1)
@@ -65,4 +65,4 @@ const seedContactPersons = async () => {
   })
 }
 
-module.exports = seedContactPersons
+module.exports = seedContactPeople
