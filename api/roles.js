@@ -14,7 +14,7 @@ router.get('/all', auth, async (req, res) => {
     res.json(roles)
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({ msg: 'Server Error' });
+    res.status(500).json({ msg: 'Błąd serwera' });
   }
 })
 

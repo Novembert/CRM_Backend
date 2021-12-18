@@ -42,7 +42,7 @@ router.post(
       res.json(company)
     } catch (error) {
       console.error(error.message);
-      res.status(500).json({ msg: 'Server Error' });
+      res.status(500).json({ msg: 'Błąd serwera' });
     }
   }
 )
@@ -110,7 +110,7 @@ router.post('/all', auth, async (req, res) => {
     res.json({ data: companies, count })
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({ msg: 'Server Error' });
+    res.status(500).json({ msg: 'Błąd serwera' });
   }
 })
 
@@ -130,7 +130,7 @@ router.get('/:id', auth, async (req, res) => {
     res.json(company)
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({ msg: 'Server Error' });
+    res.status(500).json({ msg: 'Błąd serwera' });
   }
 })
 
@@ -190,7 +190,7 @@ router.post('/:id/notes', auth, async (req, res) => {
     res.json({ data: notes, count })
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({ msg: 'Server Error' });
+    res.status(500).json({ msg: 'Błąd serwera' });
   }
 })
 
@@ -221,7 +221,7 @@ router.post('/:id/contact-people', auth, async (req, res) => {
     res.json({ data: notes, count })
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({ msg: 'Server Error' });
+    res.status(500).json({ msg: 'Błąd serwera' });
   }
 })
 
@@ -255,7 +255,7 @@ router.put(
       res.json(company)
     } catch (error) {
       console.error(error.message);
-      res.status(500).json({ msg: 'Server Error' });
+      res.status(500).json({ msg: 'Błąd serwera' });
     }
   }
 )
@@ -277,7 +277,7 @@ router.delete('/:id', auth, async (req,res) => {
     
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({ msg: 'Server Error' });
+    res.status(500).json({ msg: 'Błąd serwera' });
   }
 })
 

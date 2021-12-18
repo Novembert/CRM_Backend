@@ -77,7 +77,7 @@ router.post(
       res.json(user)
     } catch (error) {
       console.error(error.message);
-      res.status(500).json({ msg: 'Server Error' });
+      res.status(500).json({ msg: 'Błąd serwera' });
     }
   }
 );
@@ -129,7 +129,7 @@ router.post('/all', auth, async (req, res) => {
     res.json({ data: users, count})
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({ msg: 'Server Error' });
+    res.status(500).json({ msg: 'Błąd serwera' });
   }
 })
 
@@ -142,7 +142,7 @@ router.get('/all', auth, async (req, res) => {
     res.json(users)
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({ msg: 'Server Error' });
+    res.status(500).json({ msg: 'Błąd serwera' });
   }
 })
 
@@ -162,7 +162,7 @@ router.get('/:id', auth, async (req, res) => {
     res.json(user);
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({ msg: 'Server Error' });
+    res.status(500).json({ msg: 'Błąd serwera' });
   }
 })
 
@@ -227,7 +227,7 @@ router.post('/:id/companies', auth, async (req, res) => {
     res.json({ data: companies, count })
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({ msg: 'Server Error' });
+    res.status(500).json({ msg: 'Błąd serwera' });
   }
 })
 
@@ -259,7 +259,7 @@ router.post('/:id/notes', auth, async (req, res) => {
     res.json({data: notes, count })
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({ msg: 'Server Error' });
+    res.status(500).json({ msg: 'Błąd serwera' });
   }
 })
 
@@ -294,7 +294,7 @@ router.post('/:id/contact-people', auth, async (req, res) => {
     res.json({ data: contactPeople, count })
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({ msg: 'Server Error' });
+    res.status(500).json({ msg: 'Błąd serwera' });
   }
 })
 
@@ -322,7 +322,7 @@ router.put('/:id', [
     
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({ msg: 'Server Error' });
+    res.status(500).json({ msg: 'Błąd serwera' });
   }
 })
 
@@ -343,7 +343,7 @@ router.delete('/:id', [auth, checkRole(['Administrator'])], async (req,res) => {
     
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({ msg: 'Server Error' });
+    res.status(500).json({ msg: 'Błąd serwera' });
   }
 })
 

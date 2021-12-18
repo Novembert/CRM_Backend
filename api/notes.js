@@ -31,7 +31,7 @@ router.post(
       res.json(note)
     } catch (error) {
       console.error(error.message);
-      res.status(500).json({ msg: 'Server Error' });
+      res.status(500).json({ msg: 'Błąd serwera' });
     }
   }
 )
@@ -66,7 +66,7 @@ router.put(
       res.json(note)
     } catch (error) {
       console.error(error.message);
-      res.status(500).json({ msg: 'Server Error' });
+      res.status(500).json({ msg: 'Błąd serwera' });
     }
   }
 )
@@ -96,7 +96,7 @@ router.delete(
       res.json(note)
     } catch (error) {
       console.error(error.message);
-      res.status(500).json({ msg: 'Server Error' });
+      res.status(500).json({ msg: 'Błąd serwera' });
     }
   }
 )
