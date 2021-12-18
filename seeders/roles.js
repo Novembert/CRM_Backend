@@ -2,9 +2,9 @@ const Role = require('./../models/Role');
 const { addItems, deleteItems } = require('./lib')
 
 const data = [
-  {name: 'Administrator'},
-  {name: 'Pracownik'},
-  {name: 'Moderator'}
+  {name: 'Administrator', number: 1},
+  {name: 'Moderator', number: 2},
+  {name: 'Pracownik', number: 3},
 ]
 
 const seedRoles = async () => {
