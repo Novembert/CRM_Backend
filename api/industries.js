@@ -5,6 +5,7 @@ const { check, validationResult } = require('express-validator');
 const { likeRelation, clearFilters, calculateSkip, generateOrder }  = require('./lib')
 
 const Industry = require('./../models/Industry');
+const Company = require('./../models/Company');
 
 // @route   POST api/industries
 // @desc    Create industry
@@ -140,6 +141,8 @@ router.delete('/:id', auth, async (req,res) => {
     let industry = await Industry.findByIdAndUpdate(id, { isDeleted: true }, {
       new: true
     })
+
+    await Company.updateMany({ industry: id }, { isDeleted: true })
 
     if (!industry) {
       return res.status(400).json({ msg: 'Nie znaleziono branży' });
